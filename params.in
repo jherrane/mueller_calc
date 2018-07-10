@@ -1,0 +1,19 @@
+#####  Physical setup   #######################################################
+# Grain sizes
+# 0.0500 0.0598 0.0715 0.0855 0.1022 0.1223 0.1462 0.17480.2090 0.2500
+# are converted to wavelenghts below.
+
+a 1d-7                  # Equivalent radius
+
+#####  Run parameters   #######################################################
+waves log               # Wavelength band options lin, inv, log, bnd*, sil, 
+                        # isrf
+Tmat 1                  # 1 = file is usable / 0 = force T-matrix calculation
+polarization 2          # 1 = lin / 2 = un*
+bars 10                 # Number of wavelengths in range lmb1-lmb2 nm
+whichbar 0              # 0 = use all*
+lambda1 220
+lambda2 1100
+
+Ntheta 180              # Number of scattering angles in (0,pi)
+Nphi 90                 # Number of azimuthal angles in (0,2pi) [only for aligned Mueller]
