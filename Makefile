@@ -1,4 +1,5 @@
 # Compiler options
+HOSTNAME = $(firstword $(subst -, ,$(shell hostname)))
 FC = gfortran
 FCFLAGS = -O3 -ffast-math -funroll-loops -march=native
 DEBUG = -O0 -ffast-math -funroll-loops -march=native -fcheck=bounds -g -fbacktrace
@@ -9,9 +10,13 @@ LIBS = -lm -L/usr/local/lib -L/usr/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial -
 
 # Source tree definitions
 SRC = src
-VPATH = $(SRC)
+COMP = src/compatibility
+EXT = ext
+EXT1 = ext/jvie_t_matrix/src
+EXT2 = ext/fastmm_v1.0/src
+VPATH 	= $(SRC) $(COMP) $(EXT) $(EXT1) $(EXT2)
 BINDIR = bin
-EXEC = mueller_calc
+EXEC = scadyn
 
 .SUFFIXES:
 .SUFFIXES: .o .mod .f90 
@@ -42,12 +47,35 @@ ${BINDIR}/precorrection.o \
 ${BINDIR}/projection.o \
 ${BINDIR}/build_G.o \
 ${BINDIR}/gmres_module.o \
+${BINDIR}/rhs.o \
+${BINDIR}/field.o \
+${BINDIR}/solver.o \
 ${BINDIR}/transformation_matrices.o \
+${BINDIR}/clustermie.o \
+${BINDIR}/octtree.o \
+${BINDIR}/miecoat.o \
 ${BINDIR}/setup.o \
 ${BINDIR}/T_matrix.o \
+${BINDIR}/forces.o \
+${BINDIR}/bessel.o \
+${BINDIR}/shapebeam.o \
+${BINDIR}/integrator.o \
 ${BINDIR}/mueller.o \
+${BINDIR}/postprocessing.o \
 ${BINDIR}/main.o
 
+###############################################################################
+# Taito version for everything
+FCTAITO = mpif90
+INCSTAITO = -I/usr/include -I/usr/local/include/ -I${FFTW_ROOT}/include/ -I${H5ROOT}/include/ -m64 -I$(MKLROOT)/include/ -J${BINDIR}
+LIBSTAITO = -L${FFTW_ROOT}/lib -lfftw3 -lfftw3_mpi -L${H5ROOT}/lib -lhdf5_fortran -lhdf5 -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_gf_lp64.a $(MKLROOT)/lib/intel64/libmkl_core.a $(MKLROOT)/lib/intel64/libmkl_sequential.a -Wl,--end-group -lpthread -lm -ldl
+
+ifeq ($(HOSTNAME),taito)
+	yell = "Starting Make... When in taito, remember to run 'module load gcc mkl fftw hdf5-serial' or Make will fail. Upon failure, load modules, clean and run Make again."
+	FC := $(FCTAITO)
+	INCS := $(INCSTAITO)
+	LIBS := $(LIBSTAITO)
+endif
 ###############################################################################
 
 # No need to touch below, unless bad makefileing or messages need tweaking...
