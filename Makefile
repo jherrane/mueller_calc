@@ -12,7 +12,7 @@ LIBS = -lm -L/usr/local/lib -L/usr/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial -
 SRC = src
 VPATH 	= $(SRC)
 BINDIR = bin
-EXEC = scadyn
+EXEC = mueller_calc
 
 .SUFFIXES:
 .SUFFIXES: .o .mod .f90 
