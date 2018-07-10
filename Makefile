@@ -10,11 +10,7 @@ LIBS = -lm -L/usr/local/lib -L/usr/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial -
 
 # Source tree definitions
 SRC = src
-COMP = src/compatibility
-EXT = ext
-EXT1 = ext/jvie_t_matrix/src
-EXT2 = ext/fastmm_v1.0/src
-VPATH 	= $(SRC) $(COMP) $(EXT) $(EXT1) $(EXT2)
+VPATH 	= $(SRC)
 BINDIR = bin
 EXEC = scadyn
 
@@ -47,21 +43,10 @@ ${BINDIR}/precorrection.o \
 ${BINDIR}/projection.o \
 ${BINDIR}/build_G.o \
 ${BINDIR}/gmres_module.o \
-${BINDIR}/rhs.o \
-${BINDIR}/field.o \
-${BINDIR}/solver.o \
 ${BINDIR}/transformation_matrices.o \
-${BINDIR}/clustermie.o \
-${BINDIR}/octtree.o \
-${BINDIR}/miecoat.o \
 ${BINDIR}/setup.o \
 ${BINDIR}/T_matrix.o \
-${BINDIR}/forces.o \
-${BINDIR}/bessel.o \
-${BINDIR}/shapebeam.o \
-${BINDIR}/integrator.o \
 ${BINDIR}/mueller.o \
-${BINDIR}/postprocessing.o \
 ${BINDIR}/main.o
 
 ###############################################################################
