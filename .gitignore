@@ -1,0 +1,43 @@
+
+# Created by https://www.gitignore.io/api/Fortran
+
+### Fortran ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+Geometries
+T
+*.sh
+
+
+# End of https://www.gitignore.io/api/Fortran
