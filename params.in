@@ -15,5 +15,7 @@ whichbar 0              # 0 = use all*
 lambda1 220
 lambda2 1100
 
+xi_in 0d0               # Precession angle of aligned particles, 0 = perfect alignment
+
 Ntheta 180              # Number of scattering angles in (0,pi)
 Nphi 90                 # Number of azimuthal angles in (0,2pi) [only for aligned Mueller]

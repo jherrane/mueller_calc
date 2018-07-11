@@ -58,8 +58,13 @@ contains
                ind3 = ind3 + 1
                write(*, '(2(A,I0))') '  Computing aligned Mueller matrix ', &
                ind3, '/', size(mesh%ki, 1)*size(inc_angles, 1)
-               call mueller_align(matrices, mesh, Ntheta, Nphi, N_size, inc_angles(N_ia), &
+               if(matrices%xi_in>0d0) then
+                  call mueller_align(matrices, mesh, Ntheta, Nphi, N_size, inc_angles(N_ia), &
+                  S_al, K_al, Csca_al, Cext_al,matrices%xi_in)  
+               else
+                  call mueller_align(matrices, mesh, Ntheta, Nphi, N_size, inc_angles(N_ia), &
                   S_al, K_al, Csca_al, Cext_al)  
+               end if
                do i = 1, Ntheta*Nphi
                   ind = ind + 1
                   SS(ind, 1) = 1+size(mesh%ki,1)-N_size

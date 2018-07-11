@@ -226,6 +226,8 @@ contains
             case ('lambda2')
                read (buffer, *, iostat=ios) lambda2
                matrices%lambda2 = lambda2*1.d-9
+            case ('xi_in')
+               read (buffer, *, iostat=ios) matrices%xi_in
             case ('whichbar')
                read (buffer, *, iostat=ios) whichbar
                if (matrices%whichbar == 0) matrices%whichbar = whichbar
