@@ -1,6 +1,6 @@
 #####  Physical setup   #######################################################
 # Grain sizes
-# 0.0500 0.0598 0.0715 0.0855 0.1022 0.1223 0.1462 0.17480.2090 0.2500
+# 0.0500 0.0598 0.0715 0.0855 0.1022 0.1223 0.1462 0.1748 0.2090 0.2500
 # are converted to wavelenghts below.
 
 a 1d-7                  # Equivalent radius
@@ -17,5 +17,5 @@ lambda2 1100
 
 xi_in 0d0               # Precession angle of aligned particles, 0 = perfect alignment
 
-Ntheta 180              # Number of scattering angles in (0,pi)
-Nphi 90                 # Number of azimuthal angles in (0,2pi) [only for aligned Mueller]
+N_ia 90
+ia_range 0d0 180d0

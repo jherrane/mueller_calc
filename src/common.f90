@@ -29,8 +29,13 @@ module common
 
    integer :: debug = 0
    integer :: T_size = 0
-   integer :: Ntheta = 180
-   integer :: Nphi = 90
+   integer :: N_ia = 180
+   integer :: N_points = 0
+   integer :: N_theta = 0
+   real(dp), dimension(2) :: ia_range = [0d0, 180d0]
+   real(dp), dimension(:,:), allocatable :: points
+
+   character(len=80) :: points_file = 'points'
 
 ! TYPES ***********************************************************************
 !****************************************************************************80
@@ -1199,6 +1204,24 @@ contains
    end function choose
 
 !****************************************************************************80
+   
+   function calc_uniques(array) result(i)
+      integer :: i 
+      real(dp) :: min_val, max_val
+      real(dp), dimension(:,:), allocatable :: array
+      real(dp), dimension(:), allocatable :: val
+
+      i = 0
+      allocate(val(size(array,2)),source=array(1,:))
+
+      min_val = minval(val)-1
+      max_val = maxval(val)
+      do while (min_val<max_val)
+         i = i+1
+         min_val = minval(val, mask=val>min_val)
+      enddo
+
+   end function calc_uniques
 
 end module common
 

@@ -145,6 +145,9 @@ contains
          case ('-x', '--xi')
             call get_command_argument(i + 1, arg)
             read (arg, *) matrices%xi_in
+         case ('-P', '--points')
+            call get_command_argument(i + 1, arg)
+            read (arg, *) points_file
 
          case ('-h', '--help')
             write (*, '(A)') ' Commands        Value       Description'
@@ -157,7 +160,7 @@ contains
             write (*, '(A)') ' -w --wavelen    0           Choose wavelength from the T-matrix'
             write (*, '(A)') ' -S --singleT    0           Calculate only one T-matrix, of wb'
             write (*, '(A)') ' -x --xi         0.0         Precession angle about B'
-
+            write (*, '(A)') ' -P --points     points      File for Mueller angular grid'
             stop
          case default
             print'(a,a,/)', 'Unrecognized command-line option: ', arg_name
@@ -210,10 +213,6 @@ contains
             select case (label)
             case ('a')
                read (buffer, *, iostat=ios) mesh%a
-            case ('Ntheta')
-               read (buffer, *, iostat=ios) Ntheta
-            case ('Nphi')
-               read (buffer, *, iostat=ios) Nphi
             case ('polarization')
                read (buffer, *, iostat=ios) matrices%polarization
             case ('bars')
@@ -228,6 +227,10 @@ contains
                matrices%lambda2 = lambda2*1.d-9
             case ('xi_in')
                read (buffer, *, iostat=ios) matrices%xi_in
+            case ('N_ia')
+               read (buffer, *, iostat=ios) N_ia
+            case ('ia_range')
+               read (buffer, *, iostat=ios) ia_range
             case ('whichbar')
                read (buffer, *, iostat=ios) whichbar
                if (matrices%whichbar == 0) matrices%whichbar = whichbar
@@ -240,12 +243,30 @@ contains
 
       close (fh)
       matrices%R90_init = reshape(dble([0d0, 1d0, 0d0, -1d0, 0d0, 0d0, 0d0, 0d0, 1d0]), [3, 3])
-
+! Convert angles to radians
+      ia_range = ia_range*pi/180d0
       allocate (mesh%ki(matrices%bars))
       allocate (matrices%E_rel(matrices%bars))
       allocate (matrices%Nmaxs(matrices%bars))
 
    end subroutine read_params
+
+!****************************************************************************80
+
+   subroutine read_points(matrices, mesh)
+      type(data) :: matrices
+      type(mesh_struct) :: mesh
+      real(dp), dimension(:,:), allocatable :: input
+
+      N_points = get_last_line_no(points_file)
+      allocate(points(2,N_points), input(3,N_points))
+      open(1, file = points_file)
+      read(1,*) input
+      close(1)
+      points = input(2:3, :)
+      N_theta = calc_uniques(points)
+
+   end subroutine read_points
 
 !****************************************************************************80
 

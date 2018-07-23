@@ -13,6 +13,7 @@ program main
    call check_paramsfile(matrices)
    call read_params(matrices, mesh)
    call read_arguments(matrices, mesh)
+   call read_points(matrices, mesh)
    call wavelength_band(matrices, mesh)
 
    call init_geometry(matrices, mesh)

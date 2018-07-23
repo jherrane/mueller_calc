@@ -1,4 +1,5 @@
 module mueller
+   use common
    use T_matrix
    use gaussquad
    implicit none
@@ -10,89 +11,102 @@ contains
    subroutine scattering_extinction_matrices(matrices, mesh)
       type(data) :: matrices
       type(mesh_struct) :: mesh
-      integer :: i, j, ind, ind2, ind3, ii, N_size, N_ia, halton_init
-      real(dp) :: inc_angles(2), K(4, 4), Cext_al, Csca_al, Cext_ave, Csca_ave
+      integer :: i, j, ind_ave, ind2_ave, ind_al, ind2_al, ind3, ii, N_size, N_incangle, halton_init
+      real(dp) :: K(4, 4), Cext_al, Csca_al, Cext_ave, Csca_ave
       complex(dp) :: Kevals(4), Kevecs(4, 4)
-      real(dp), dimension(:, :), allocatable :: S_ave, S_al, SS, K_ave, K_al, KK, points
-      CHARACTER(LEN=80) :: mueller_out, extinction_out
+      real(dp), dimension(:, :), allocatable :: S_ave, S_al, K_ave, K_al, &
+      SS_ave, KK_ave, SS_al, KK_al
+      real(dp), dimension(N_ia) :: inc_angles
+      CHARACTER(LEN=80) :: mueller_al, extinction_al, mueller_av, extinction_av
 
-      mueller_out = 'out/M'//trim(matrices%out)
-      extinction_out = 'out/E'//trim(matrices%out)
+      mueller_al = 'out/M'//trim(matrices%out)//'-al'
+      extinction_al = 'out/E'//trim(matrices%out)//'-al'
+      mueller_av = 'out/M'//trim(matrices%out)//'-ave'
+      extinction_av = 'out/E'//trim(matrices%out)//'-ave'
 
-      inc_angles = [90d0, 180d0]
+      call linspace(ia_range(1), ia_range(2), N_ia, inc_angles)
 
-      allocate (SS(Ntheta*Nphi*size(mesh%ki, 1)*(1+size(inc_angles)), 20))
-      allocate (KK(size(mesh%ki, 1)*(1+size(inc_angles)), 20))
-      SS = 0d0
-      KK = 0d0
-      allocate (S_al(Ntheta*Nphi, 18), K_al(1, 18))
+      allocate (SS_ave(N_points*size(mesh%ki, 1), 20))
+      allocate (SS_al(N_points*size(mesh%ki, 1)*(size(inc_angles)), 20))
+      allocate (KK_ave(size(mesh%ki, 1), 20))
+      allocate (KK_al(size(mesh%ki, 1)*(size(inc_angles)), 20))
+      SS_ave = 0d0
+      KK_ave = 0d0
+      SS_al = 0d0
+      KK_ave = 0d0
+      allocate (S_al(N_points, 18), K_al(1, 18))
 
-      ind = 0
-      ind2 = 0
+      ind_ave = 0
+      ind2_ave = 0
+      ind_al = 0
+      ind2_al = 0
       ind3 = 0
+
       do N_size = size(mesh%ki, 1), 1, -1
 ! Choose wavelength
          mesh%k = mesh%ki(N_size)
          
-         do N_ia = 0, size(inc_angles, 1)      
-            if(N_ia==0) then
+         do N_incangle = 0, size(inc_angles, 1)      
+            if(N_incangle==0) then
                write(*, '(2(A,I0))') '  Computing average Mueller matrix ', 1+size(mesh%ki,1)-N_size, &
                '/', size(mesh%ki,1)
-               call mueller_ave(matrices, mesh, Ntheta, 1, N_size, S_ave, &
+               call mueller_ave(matrices, mesh, N_points, points, N_size, S_ave, &
                   K_ave, Csca_ave, Cext_ave)
-               do i = 1,Ntheta
-                  ind = ind + 1
-                  SS(ind, 1) = 1+size(mesh%ki,1)-N_size
-                  SS(ind, 2) = 0
-                  SS(ind, 3) = i
-                  SS(ind, 4:19) = S_ave(i, 3:18)
-                  SS(ind, 20) = Csca_ave
+               do i = 1,N_points
+                  ind_ave = ind_ave + 1
+                  SS_ave(ind_ave, 1) = 1+size(mesh%ki,1)-N_size
+                  SS_ave(ind_ave, 2) = 0
+                  SS_ave(ind_ave, 3) = i
+                  SS_ave(ind_ave, 4:19) = S_ave(i, 3:18)
+                  SS_ave(ind_ave, 20) = Csca_ave
                end do
-               ind2 = ind2 + 1
-               KK(ind2, 1) = 1+size(mesh%ki,1)-N_size
-               KK(ind2, 2) = N_ia
-               KK(ind2, 3) = 1
-               KK(ind2, 4:19) = K_ave(1, 3:18)
-               KK(ind2, 20) = Cext_ave
+               ind2_ave = ind2_ave + 1
+               KK_ave(ind2_ave, 1) = 1+size(mesh%ki,1)-N_size
+               KK_ave(ind2_ave, 2) = N_ia
+               KK_ave(ind2_ave, 3) = 1
+               KK_ave(ind2_ave, 4:19) = K_ave(1, 3:18)
+               KK_ave(ind2_ave, 20) = Cext_ave
             else
                ind3 = ind3 + 1
                write(*, '(2(A,I0))') '  Computing aligned Mueller matrix ', &
                ind3, '/', size(mesh%ki, 1)*size(inc_angles, 1)
                if(matrices%xi_in>0d0) then
-                  call mueller_align(matrices, mesh, Ntheta, Nphi, N_size, inc_angles(N_ia), &
+                  call mueller_align(matrices, mesh, N_points, points, N_size, inc_angles(N_incangle), &
                   S_al, K_al, Csca_al, Cext_al,matrices%xi_in)  
                else
-                  call mueller_align(matrices, mesh, Ntheta, Nphi, N_size, inc_angles(N_ia), &
+                  call mueller_align(matrices, mesh, N_points, points, N_size, inc_angles(N_incangle), &
                   S_al, K_al, Csca_al, Cext_al)  
                end if
-               do i = 1, Ntheta*Nphi
-                  ind = ind + 1
-                  SS(ind, 1) = 1+size(mesh%ki,1)-N_size
-                  SS(ind, 2) = N_ia
-                  SS(ind, 3) = i
-                  SS(ind, 4:19) = S_al(i, 3:18)
-                  SS(ind, 20) = Csca_al
+               do i = 1, N_points
+                  ind_al = ind_al + 1
+                  SS_al(ind_al, 1) = 1+size(mesh%ki,1)-N_size
+                  SS_al(ind_al, 2) = N_incangle
+                  SS_al(ind_al, 3) = i
+                  SS_al(ind_al, 4:19) = S_al(i, 3:18)
+                  SS_al(ind_al, 20) = Csca_al
                end do
-               ind2 = ind2 + 1
-               KK(ind2, 1) = 1+size(mesh%ki,1)-N_size
-               KK(ind2, 2) = N_ia
-               KK(ind2, 3) = 1
-               KK(ind2, 4:19) = K_al(1, 3:18)
-               KK(ind2, 20) = Cext_al
+               ind2_al = ind2_al + 1
+               KK_al(ind2_al, 1) = 1+size(mesh%ki,1)-N_size
+               KK_al(ind2_al, 2) = N_incangle
+               KK_al(ind2_al, 3) = 1
+               KK_al(ind2_al, 4:19) = K_al(1, 3:18)
+               KK_al(ind2_al, 20) = Cext_al
             end if
          end do
       end do
-      call write_RT_matrix(SS, mueller_out, 1)
-      call write_RT_matrix(KK, extinction_out, 2)
+      call write_RT_matrix(SS_al, mueller_al, 1)
+      call write_RT_matrix(KK_al, extinction_al, 2)
+      call write_RT_matrix(SS_ave, mueller_av, 1)
+      call write_RT_matrix(KK_ave, extinction_av, 2)
 
    end subroutine scattering_extinction_matrices
 
 !****************************************************************************80
 
-   subroutine mueller_ave(matrices, mesh, N_theta, N_phi, ii, SS, KK, Csca_out, Cext_out)
+   subroutine mueller_ave(matrices, mesh, N_points, points, ii, SS, KK, Csca_out, Cext_out)
       type(data) :: matrices
       type(mesh_struct) :: mesh
-      integer :: i, ii, N_avgs, halton_init, nm, Nmax, N_theta, N_phi
+      integer :: i, j, ii, N_avgs, halton_init, nm, Nmax, N_points
       real(dp) :: E, vec(3), k_sph(3)
       real(dp) :: Cext, Cabs, Csca, Csca_out, Cext_out
       real(dp), dimension(:, :), allocatable :: S, SS, K, KK, points
@@ -100,7 +114,7 @@ contains
       complex(dp), dimension(:), allocatable :: p, q, p90, q90
 
       N_avgs = 720 ! Number of averaging directions
-      if(.not. allocated(SS)) allocate(SS(N_theta*N_phi,18), KK(1,18))
+      if(.not. allocated(SS)) allocate(SS(N_points,18), KK(1,18))
       SS = 0d0
       KK = 0d0
       Csca = 0d0 
@@ -128,10 +142,10 @@ contains
 
          if (allocated(S)) deallocate (S, K)
 
-         call mueller_matrix_coeff(p, q, p90, q90, dcmplx(mesh%k), N_theta, N_phi, S)
+         call scattering_matrix_coeff(p, q, p90, q90, dcmplx(mesh%k), N_points, points, S)
          call extinction_matrix_coeff(p, q, p90, q90, dcmplx(mesh%k), k_sph(2), k_sph(3), K)
          call cross_sections(p, q, a_in, b_in, dcmplx(mesh%k), Nmax, Cext, Csca, Cabs)
-         
+
          SS = SS + S/N_avgs
          KK = KK + K/N_avgs
          Csca_out = Csca_out + Csca/N_avgs
@@ -142,11 +156,11 @@ contains
 
 !****************************************************************************80
 
-   subroutine mueller_align(matrices, mesh, N_theta, N_phi, ii, psi, &
+   subroutine mueller_align(matrices, mesh, N_points, points, ii, psi, &
       SS, KK, Csca_out, Cext_out, xi_in)
       type(data) :: matrices
       type(mesh_struct) :: mesh
-      integer :: i, j, ii, ind, N_theta, N_phi, Nmax, NB, Nxi
+      integer :: i, j, ii, ind, N_points, Nmax, NB, Nxi
       real(dp) :: E, vec(3), phi, omega(3), k_sph(3), &
       aproj(3), theta, xi, B(3), phi_B, psi
       real(dp) :: Cext, Cabs, Csca, Csca_out, Cext_out
@@ -207,7 +221,7 @@ contains
 
             if (allocated(S)) deallocate (S, K)
 
-            call mueller_matrix_coeff(p, q, p90, q90, dcmplx(mesh%k), N_theta, N_phi, S)
+            call scattering_matrix_coeff(p, q, p90, q90, dcmplx(mesh%k), N_points, points, S)
             call extinction_matrix_coeff(p, q, p90, q90, dcmplx(mesh%k), k_sph(2), k_sph(3), K)
             call cross_sections(p, q, a_in, b_in, dcmplx(mesh%k), Nmax, Cext, Csca, Cabs)
 

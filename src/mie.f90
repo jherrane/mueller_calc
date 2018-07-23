@@ -609,6 +609,10 @@ contains
       do i1 = 1, N_points
          theta = points(1, i1)
          phi = points(2, i1)
+         if(theta<1d-7 .AND. phi<1d-7) then
+            theta = 1d-7
+            phi = 1d-7
+         end if
 
          abcd(1, :) = [cos(phi), sin(phi)]
          abcd(2, :) = [sin(phi), -cos(phi)]
