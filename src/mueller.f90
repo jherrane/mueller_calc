@@ -150,6 +150,7 @@ contains
          KK = KK + K/N_avgs
          Csca_out = Csca_out + Csca/N_avgs
          Cext_out = Cext_out + Cext/N_avgs
+         call print_bar(i,N_avgs)
       end do
 
    end subroutine mueller_ave
