@@ -62,7 +62,7 @@ contains
                end do
                ind2_ave = ind2_ave + 1
                KK_ave(ind2_ave, 1) = 1+size(mesh%ki,1)-N_size
-               KK_ave(ind2_ave, 2) = N_ia
+               KK_ave(ind2_ave, 2) = 0
                KK_ave(ind2_ave, 3) = 1
                KK_ave(ind2_ave, 4:19) = K_ave(1, 3:18)
                KK_ave(ind2_ave, 20) = Cext_ave
