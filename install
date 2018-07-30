@@ -1,6 +1,6 @@
 install() {
 	make
-	./mueller_calc --mesh examples/GRE-1.h5 -T examples/T-GRE-1.h5
+	./mueller_calc
 }
 
 install
